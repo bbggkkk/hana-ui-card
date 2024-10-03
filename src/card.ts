@@ -72,14 +72,14 @@ export abstract class HanaCard<T extends StackCardConfig = StackCardConfig> exte
         gap: var(--hana-ui-card-gap);
         list-style: none;
     }
-    li {
+    /* li {
         transition: all .3s;
     }
     li:hover {
         transform: translateY(-2px);
         --ha-card-background: hsl(var(--hana-ui-gray-base) 100%);
         --ha-card-box-shadow: 0 4px 0 hsl(var(--hana-ui-gray-base) 64%);
-    }
+    } */
     ha-icon {
         display: flex;
     }
