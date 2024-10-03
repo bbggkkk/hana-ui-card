@@ -35,9 +35,12 @@ export abstract class HanaCard<T extends StackCardConfig = StackCardConfig> exte
         --hana-ui-card-gap: calc(var(--hana-ui-card-padding) / 4);
         --hana-ui-card-radius: calc(var(--hana-ui-card-padding) * 2);
 
-        --hana-ui-card-background: hsl(var(--hana-ui-gray-base) 92%);
+        --hana-ui-card-background: hsl(var(--hana-ui-gray-base) 94%);
     }
     :host {
+        --ha-card-background: hsl(var(--hana-ui-gray-base) 98%);
+        --ha-card-box-shadow: 0 0 0 hsl(var(--hana-ui-gray-base) 90%);
+
         --ha-card-border-width: 0px;
         --ha-card-border-radius: calc(var(--hana-ui-card-radius) / 2);
     }
@@ -68,6 +71,14 @@ export abstract class HanaCard<T extends StackCardConfig = StackCardConfig> exte
         grid-template-columns: 100%;
         gap: var(--hana-ui-card-gap);
         list-style: none;
+    }
+    li {
+        transition: all .3s;
+    }
+    li:hover {
+        transform: translateY(-2px);
+        --ha-card-background: hsl(var(--hana-ui-gray-base) 100%);
+        --ha-card-box-shadow: 0 4px 0 hsl(var(--hana-ui-gray-base) 64%);
     }
     ha-icon {
         display: flex;
@@ -105,7 +116,12 @@ export abstract class HanaCard<T extends StackCardConfig = StackCardConfig> exte
     }
 
     getCardSize(){
-        return 1
+        const promises = this.cards.map(card => customElements.whenDefined(card.tagName.toLocaleLowerCase()).then(() => {
+            return card.getCardSize()
+        }))
+        return Promise.all(promises).then((sizes) => {
+            return sizes.reduce((acc, size) => acc+=size, 0)
+        })
     }
 
     protected update(changedProperties: any) {
