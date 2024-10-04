@@ -3,7 +3,9 @@ import { LovelaceCardConfig } from 'frontend/src/data/lovelace/config/card'
 import { LovelaceCard, LovelaceCardEditor } from 'frontend/src/panels/lovelace/types'
 import { LitElement, html, css, nothing, TemplateResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
+import { styleMap } from 'lit/directives/style-map.js'
 import { pushCardList } from 'src/utils/pushCardList'
+import { HuiCard } from 'frontend/src/panels/lovelace/cards/hui-card'
 
 @customElement("hana-ui-card")
 export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement implements LovelaceCard {
@@ -23,12 +25,14 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
         };
     }
 
-    @property({ attribute: false }) public _hass?: HomeAssistant;
     @property({ type: String }) public title: string = ""
     @property({ type: String }) public icon: string = ""
+    @property({ type: Boolean }) public isNaturalCardStyle: boolean = false
+    @property({ attribute: false }) public card?: TemplateResult<1>
+    
+    @property({ attribute: false }) public _hass?: HomeAssistant;
     @property({ type: String }) public layout: string = "panel"
     @property({ type: Boolean }) public preview = false
-    @property({ attribute: false }) public card?: TemplateResult<1>
     @state() protected _config?: T
 
     static styles = css`
@@ -50,7 +54,6 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
     :host {
         --ha-card-border-width: 0px;
         --ha-card-border-radius: calc(var(--hana-ui-card-radius) / 2);
-        /* --ha-card-background: transparent; */
     }
     ::-webkit-scrollbar {
         display: none;
@@ -83,12 +86,19 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
     }
     ha-icon {
         display: flex;
+    }`
+
+    constructor(){
+        super()
+        this.attachShadow({mode:'open'})
     }
-    `
 
     render() {
+        const style = {
+            '--ha-card-background': this.isNaturalCardStyle ? 'transparent' : 'inherit'
+        }
         return html`
-        <div class="hana-ui-card">
+        <div class="hana-ui-card" style=${styleMap(style)}>
             ${this.isTitleView(this.title, this.icon)}
             ${this.isCardView(this.card)}
         </div>    
@@ -113,11 +123,6 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
         }
     }
 
-    constructor(){
-        super()
-        this.attachShadow({mode:'open'})
-    }
-
     setConfig(config: T) {
         this._config = config
         if (config.card) {
@@ -133,7 +138,7 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
         if(this.card !== undefined && cardElement) {
             return cardElement.getCardSize()
         } else {
-            return 5
+            return 8
         }
     }
 
@@ -177,6 +182,7 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
 export interface HanaUiCardConfig extends LovelaceCardConfig {
     title?: string
     icon?: string
+    isNaturalCardStyle?: boolean
 }
 
 pushCardList({

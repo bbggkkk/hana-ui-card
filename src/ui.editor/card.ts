@@ -18,6 +18,10 @@ const SCHEMA = [
         selector: { icon: {} },
     },
     {
+        name: "isNaturalCardStyle",
+        selector: { boolean: {} },
+    },
+    {
         name: "theme",
         selector: { theme: {} }
     },
