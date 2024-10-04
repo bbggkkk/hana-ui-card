@@ -1,8 +1,7 @@
 import { HomeAssistant } from 'frontend/src/types'
 import { LovelaceCardConfig } from 'frontend/src/data/lovelace/config/card'
-import { HuiCard } from 'frontend/src/panels/lovelace/cards/hui-card'
 import { LovelaceCard, LovelaceCardEditor } from 'frontend/src/panels/lovelace/types'
-import { LitElement, html, css, nothing } from 'lit'
+import { LitElement, html, css, nothing, TemplateResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { pushCardList } from 'src/utils/pushCardList'
 
@@ -29,7 +28,7 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
     @property({ type: String }) public icon: string = ""
     @property({ type: String }) public layout: string = "panel"
     @property({ type: Boolean }) public preview = false
-    @state() public card?: HuiCard
+    @property({ attribute: false }) public card?: TemplateResult<1>
     @state() protected _config?: T
 
     static styles = css`
@@ -106,44 +105,36 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
              return nothing
          }
     }
-    private isCardView(card?: HuiCard){
+    private isCardView(card?: TemplateResult<1>){
         if(card === undefined) {
             return nothing
         }else {
-            return html`<div class="${this.card !== undefined && this.card.tagName === "HUI-CARD" ? 'hui-wrapper' : nothing}">
-                ${this.card}
-            </div>`
+            return card
         }
     }
 
     setConfig(config: T) {
+        this._config = config
         if (config.card) {
-            this.card = this.createChildCard(config.card)
-        //   throw new Error("You need to define an card")
+            this.card = this.createChildCard()
         }
         this.title = config.title || ""
         this.icon = config.icon ?? ""
-
-        this._config = config
     }
 
     getCardSize(){
-        if(this.card !== undefined) {
-            return this.card.getCardSize()
-        } else {
-            return 1
-        }
+        return 1
+        // if(this.card !== undefined) {
+        //     return this.card.getCardSize()
+        // } else {
+        //     return 1
+        // }
     }
 
     protected update(changedProperties: any) {
         super.update(changedProperties)
-        if (this.card !== undefined) {
-            if(changedProperties.has('hass') && this.hass !== undefined) {
-                this.updateCards(this.hass)
-            }
-            if (changedProperties.has("preview")) {
-                this.card.preview = this.preview
-            }
+        if(changedProperties.size > 0 && this._config !== undefined) {
+            this.card = this.createChildCard()
         }
 
         if (changedProperties.has("layout")) {
@@ -151,24 +142,25 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
         }
     }
 
-    private updateCards(hass: HomeAssistant) {
-        if(this.card !== undefined) {
-            this.card.hass = hass
+    private createChildCard() {
+        if(this._config === undefined || this._config.card === undefined || this.hass === undefined) {
+            return undefined
+        }else {
+            return html`
+                <div class=${this._config.card.type.split(':')[0] === 'custom' ? nothing : 'hui-wrapper'}>
+                    <hui-card
+                        .hass=${this.hass}
+                        .preview=${this.preview}
+                        .config=${this._config.card}>
+                    </hui-card>
+                </div>
+            `
         }
-    }
-
-    private createChildCard(config: LovelaceCardConfig) {
-        const element = document.createElement("hui-card")
-        element.hass = this.hass
-        element.preview = this.preview
-        element.config = config
-        element.load()
-        return element
     }
 
     set hass(hass: HomeAssistant){
         this._hass = hass
-        this.updateCards(hass)
+        this.card = this.createChildCard()
     }
 
     get hass() {
