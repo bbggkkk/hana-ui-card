@@ -2,7 +2,7 @@ import { HomeAssistant } from 'frontend/src/types'
 import { LovelaceCardConfig } from 'frontend/src/data/lovelace/config/card'
 import { HuiCard } from 'frontend/src/panels/lovelace/cards/hui-card'
 import { LovelaceCard, LovelaceCardEditor } from 'frontend/src/panels/lovelace/types'
-import { LitElement, html, css } from 'lit'
+import { LitElement, html, css, nothing } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { pushCardList } from 'src/utils/pushCardList'
 
@@ -13,7 +13,14 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
         return document.createElement("hana-ui-card-editor");
     }
     public static getStubConfig(): Record<string, unknown> {
-        return { card: undefined };
+        return {
+            title: "Hana UI Card",
+            icon: "mdi:card-account-details-star-outline",
+            card: {
+                type: "entity",
+                entity: "sun.sun"
+            }
+        };
     }
 
     @property({ attribute: false }) public _hass?: HomeAssistant;
@@ -22,7 +29,7 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
     @property({ type: String }) public layout: string = "panel"
     @property({ type: Boolean }) public preview = false
     @state() public card?: HuiCard
-    @state() protected config?: T
+    @state() protected _config?: T
 
     static styles = css`
     :host {
@@ -88,14 +95,14 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
                 <p>${this.title}</p>
             </h2>`
          }else  {
-             return null
+             return nothing
          }
     }
     private isCardView(card?: HuiCard){
         if(card === undefined) {
-            return null
+            return nothing
         }else {
-            return html`<div class="${this.card !== undefined && this.card.tagName === "HUI-CARD" ? 'hui-wrapper' : null}">
+            return html`<div class="${this.card !== undefined && this.card.tagName === "HUI-CARD" ? 'hui-wrapper' : nothing}">
                 ${this.card}
             </div>`
         }
@@ -109,7 +116,7 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
         this.title = config.title || ""
         this.icon = config.icon ?? ""
 
-        this.config = config
+        this._config = config
     }
 
     getCardSize(){
@@ -170,6 +177,5 @@ pushCardList({
     type: "hana-ui-card",
     name: "Hana UI Card",
     preview: true,
-    description: "Hana UI의 컨텐츠 래퍼",
     documentationURL: "https://github.com/hana-io/lovelace-hana-ui-card"
 })
