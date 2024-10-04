@@ -123,12 +123,12 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
     }
 
     getCardSize(){
-        return 1
-        // if(this.card !== undefined) {
-        //     return this.card.getCardSize()
-        // } else {
-        //     return 1
-        // }
+        const cardElement = document.querySelector('hui-card')
+        if(this.card !== undefined && cardElement) {
+            return cardElement.getCardSize()
+        } else {
+            return 1
+        }
     }
 
     protected update(changedProperties: any) {
