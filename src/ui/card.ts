@@ -49,8 +49,8 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
     /* always override style */
     :host {
         --ha-card-border-width: 0px;
-        --ha-card-border-radius: 0;
-        --ha-card-background: transparent;
+        --ha-card-border-radius: calc(var(--hana-ui-card-radius) / 2);
+        /* --ha-card-background: transparent; */
     }
     ::-webkit-scrollbar {
         display: none;
