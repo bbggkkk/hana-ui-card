@@ -89,7 +89,7 @@ export abstract class HanaUiCardEditor extends LitElement implements LovelaceCar
                     .value=${config.card}
                     .lovelace=${this.lovelace}
                     @config-changed=${(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>) => {
-                        this.handleConfigChanged(ev, config)
+                        this.handleConfigChanged(ev, this)
                     }}
                     @GUImode-changed=${this.handleGUIModeChanged}
                 ></hui-card-element-editor>
@@ -99,7 +99,7 @@ export abstract class HanaUiCardEditor extends LitElement implements LovelaceCar
                     .hass=${this.hass}
                     .lovelace=${this.lovelace}
                     @config-changed=${(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>) => {
-                        this.handleConfigChanged(ev, config)
+                        this.handleConfigChanged(ev, this)
                     }}
                 ></hui-card-picker>`
             }
@@ -115,14 +115,14 @@ export abstract class HanaUiCardEditor extends LitElement implements LovelaceCar
         fireEvent(this, "config-changed", { config: ev.detail.value });
     }
 
-    protected handleConfigChanged(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>, config: HanaUiCardConfig) {
+    protected handleConfigChanged(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>, _this: HanaUiCardEditor) {
         ev.stopPropagation();
-        if (!config) {
+        if (!_this._config) {
           return;
         }
-        const newConfig = Object.assign({}, config, { card: ev.detail.config })
-        config = newConfig;
-        fireEvent(this, "config-changed", { config: config });
+        const newConfig = Object.assign({}, _this._config, { card: ev.detail.config })
+        _this._config = newConfig;
+        fireEvent(this, "config-changed", { config: _this._config });
     }
 
     protected handleGUIModeChanged(ev: HASSDomEvent<GUIModeChangedEvent>): void {
