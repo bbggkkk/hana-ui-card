@@ -1,3 +1,2 @@
 import 'src/styles/variables.css'
-
-import 'src/card.ts'
+import 'src/ui/card.ts'
