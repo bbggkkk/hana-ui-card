@@ -1,48 +1,34 @@
-import { HomeAssistant } from 'frontend'
+import { HomeAssistant } from 'frontend/src/types'
 import { LovelaceCardConfig } from 'frontend/src/data/lovelace/config/card'
 import { HuiCard } from 'frontend/src/panels/lovelace/cards/hui-card'
-import { StackCardConfig } from 'frontend/src/panels/lovelace/cards/types'
 import { LovelaceCard } from 'frontend/src/panels/lovelace/types'
 import { LitElement, html, css } from 'lit'
-import { html as staticHtml, literal } from 'lit/static-html.js';
 import { customElement, property, state } from 'lit/decorators.js'
 
-type HanaCardConfig = {
-    type: "custom:hana-card"
-    title: string
-    icon?: string
-    cards?: LovelaceCardConfig[]
-}
-
-export interface HanaCard {
-    shadowRoot: ShadowRoot
-}
-
 @customElement("hana-ui-card")
-export abstract class HanaCard<T extends StackCardConfig = StackCardConfig> extends LitElement implements LovelaceCard {
+export abstract class HanaCard<T extends HanaCardConfig = HanaCardConfig> extends LitElement implements LovelaceCard {
 
     @property({ attribute: false }) public _hass?: HomeAssistant;
     @property({ type: String }) public title: string = ""
     @property({ type: String }) public icon: string = ""
     @property({ type: String }) public layout: string = "panel"
     @property({ type: Boolean }) public preview = false
-    @state() public cards: HuiCard[] = []
+    @state() public card?: HuiCard
     @state() protected config?: T
 
     static styles = css`
     :host {
         --hana-ui-card-padding: 24px;
+        --hana-ui-card-border: var(--hana-ui-card-border-width, 1px) solid var(--divider-color);
         --hana-ui-card-gap: calc(var(--hana-ui-card-padding) / 4);
         --hana-ui-card-radius: calc(var(--hana-ui-card-padding) * 2);
-
         --hana-ui-card-background: hsl(var(--hana-ui-gray-base) 94%);
     }
     :host {
-        --ha-card-background: hsl(var(--hana-ui-gray-base) 98%);
-        --ha-card-box-shadow: 0 0 0 hsl(var(--hana-ui-gray-base) 90%);
-
+        --ha-card-background: hsl(var(--hana-ui-gray-base) 94%);
         --ha-card-border-width: 0px;
-        --ha-card-border-radius: calc(var(--hana-ui-card-radius) / 2);
+        --ha-card-border-radius: 0;
+        /* --ha-card-border-radius: calc(var(--hana-ui-card-radius) / 2); */
     }
     ::-webkit-scrollbar {
         display: none;
@@ -52,34 +38,24 @@ export abstract class HanaCard<T extends StackCardConfig = StackCardConfig> exte
         margin: 0;
     }
     .hana-ui-card {
-        padding: var(--hana-ui-card-padding);
         box-sizing: border-box;
         border-radius: var(--hana-ui-card-radius);
+        border: var(--hana-ui-card-border);
         background: var(--hana-ui-card-background, var(--ha-card-background, var(--card-background-color, #FFF)));
+        padding: var(--hana-ui-card-padding) 0;
+    }
+    .hui-wrapper {
+        padding: 0 calc(var(--hana-ui-card-padding) - 16px);
     }
     h2 {
         display: flex;
         align-items: center;
         gap: 8px;
-        margin-bottom: calc(var(--hana-ui-card-gap) * 2);
+        padding: 0 var(--hana-ui-card-padding) calc(var(--hana-ui-card-gap) * 2);
         font-size: var(--paper-font-title_-_font-size);
         font-weight: var(--paper-font-title_-_font-weight);
         line-height: var(--paper-font-title_-_line-height);
     }
-    ul {
-        display: grid;
-        grid-template-columns: 100%;
-        gap: var(--hana-ui-card-gap);
-        list-style: none;
-    }
-    /* li {
-        transition: all .3s;
-    }
-    li:hover {
-        transform: translateY(-2px);
-        --ha-card-background: hsl(var(--hana-ui-gray-base) 100%);
-        --ha-card-box-shadow: 0 4px 0 hsl(var(--hana-ui-gray-base) 64%);
-    } */
     ha-icon {
         display: flex;
     }
@@ -88,52 +64,50 @@ export abstract class HanaCard<T extends StackCardConfig = StackCardConfig> exte
     render() {
         return html`
         <div class="hana-ui-card">
-            <h2>
-                <ha-icon icon="${this.icon}"></ha-icon>
-                <p>${this.title}</p>
-            </h2>
-            <ul>
-                ${this.cards.map(element => html`<li>${element}</li>`)}
-            </ul>
+            ${
+                this.title || this.icon
+                ? 
+                html`<h2>
+                    <ha-icon icon="${this.icon}"></ha-icon>
+                    <p>${this.title}</p>
+                </h2>`
+                :
+                null
+            }
+            <div class="${this.card !== undefined && this.card.tagName === "HUI-CARD" ? 'hui-wrapper' : null}">
+                ${this.card}
+            </div>
         </div>    
         `
     }
 
     setConfig(config: T) {
-        if (!config.cards) {
-          throw new Error("You need to define an cards")
+        if (!config.card) {
+          throw new Error("You need to define an card")
         }
-        if(!config.title) {
-            throw new Error("You need to define an title")
-        }
-        this.title = config.title
-        this.icon = config.icon ?? "mdi:air-filter"
-        this.cards = config.cards?.map(config => {
-            return this.createChildCard(config)
-        }) || []
+        this.title = config.title || ""
+        this.icon = config.icon ?? ""
+        this.card = this.createChildCard(config.card)
 
         this.config = config
     }
 
     getCardSize(){
-        const promises = this.cards.map(card => customElements.whenDefined(card.tagName.toLocaleLowerCase()).then(() => {
-            return card.getCardSize()
-        }))
-        return Promise.all(promises).then((sizes) => {
-            return sizes.reduce((acc, size) => acc+=size, 0)
-        })
+        if(this.card !== undefined) {
+            return this.card.getCardSize()
+        } else {
+            return 1
+        }
     }
 
     protected update(changedProperties: any) {
         super.update(changedProperties)
-        if (this.cards.length > 0) {
+        if (this.card !== undefined) {
             if(changedProperties.has('hass') && this.hass !== undefined) {
                 this.updateCards(this.hass)
             }
             if (changedProperties.has("preview")) {
-                this.cards.forEach((card) => {
-                    card.preview = this.preview
-                })
+                this.card.preview = this.preview
             }
         }
 
@@ -143,9 +117,9 @@ export abstract class HanaCard<T extends StackCardConfig = StackCardConfig> exte
     }
 
     private updateCards(hass: HomeAssistant) {
-        this.cards.forEach((card) => {
-            card.hass = hass
-        })
+        if(this.card !== undefined) {
+            this.card.hass = hass
+        }
     }
 
     private createChildCard(config: LovelaceCardConfig) {
@@ -165,4 +139,9 @@ export abstract class HanaCard<T extends StackCardConfig = StackCardConfig> exte
     get hass() {
         return this._hass!
     }
+}
+
+export interface HanaCardConfig extends LovelaceCardConfig {
+    title?: string
+    icon?: string
 }
