@@ -34,17 +34,25 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
 
     static styles = css`
     :host {
-        --hana-ui-card-padding: 24px;
+        --hana-ui-card-padding-base: calc(var(--hana-ui-padding-unit) * 3);
+        --hana-ui-card-radius-base: calc(var(--hana-ui-card-padding-base) * 2);
+
         --hana-ui-card-border: var(--hana-ui-card-border-width, 1px) solid var(--divider-color);
         --hana-ui-card-gap: calc(var(--hana-ui-card-padding) / 4);
-        --hana-ui-card-radius: calc(var(--hana-ui-card-padding) * 2);
         --hana-ui-card-background: hsl(var(--hana-ui-gray-base) 94%);
     }
     :host {
         --ha-card-background: hsl(var(--hana-ui-gray-base) 94%);
+    }
+    /* always hana-ui style */
+    :host {
+        --hana-ui-card-padding: var(--hana-ui-card-padding-base, 24px);
+        --hana-ui-card-radius: var(--hana-ui-card-radius-base, 12px);
+    }
+    /* always override style */
+    :host {
         --ha-card-border-width: 0px;
         --ha-card-border-radius: 0;
-        /* --ha-card-border-radius: calc(var(--hana-ui-card-radius) / 2); */
     }
     ::-webkit-scrollbar {
         display: none;

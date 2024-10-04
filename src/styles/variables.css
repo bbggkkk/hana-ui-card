@@ -21,6 +21,12 @@
 }
 /* hana-ui theme */
 
+/* unit */
+:root {
+    --hana-ui-padding-unit: 8px;
+}
+/* unit */
+
 /* global colors */
 :root {
     background-color: var(--primary-background-color) !important;
