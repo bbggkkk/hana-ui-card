@@ -39,9 +39,6 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
 
         --hana-ui-card-background: hsl(var(--hana-ui-gray-base) 94%);
     }
-    :host {
-        --ha-card-background: hsl(var(--hana-ui-gray-base) 94%);
-    }
     
     /* always hana-ui style */
     :host {
@@ -54,6 +51,7 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
     :host {
         --ha-card-border-width: 0px;
         --ha-card-border-radius: 0;
+        --ha-card-background: transparent;
     }
     ::-webkit-scrollbar {
         display: none;
