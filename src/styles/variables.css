@@ -1,21 +1,25 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
+/* hana-ui theme */
 :root {
     --hana-ui-primary-hue: 42deg;
     --hana-ui-primary-saturation: 42%;
     --hana-ui-primary-lightness: 53%;
     --hana-ui-primary-base: var(--hana-ui-primary-hue) var(--hana-ui-primary-saturation);
     --hana-ui-primary-color: hsl(var(--hana-ui-primary-hue) var(--hana-ui-primary-saturation) var(--hana-ui-primary-lightness));
-
+    
     --hana-ui-gray-hue: 217deg;
     --hana-ui-gray-saturation: 21%;
     --hana-ui-gray-lightness: 50%;
     --hana-ui-gray-base: var(--hana-ui-gray-hue) var(--hana-ui-gray-saturation);
     --hana-ui-gray-color: hsl(var(--hana-ui-gray-hue) var(--hana-ui-gray-saturation) var(--hana-ui-gray-lightness));
-
+    
     --hana-ui-text-color: hsl(var(--hana-ui-gray-base) 12%);
     --hana-ui-background-color: hsl(var(--hana-ui-gray-base) 98%);
+
+    --hana-ui-card-border-width: 0px;
 }
+/* hana-ui theme */
 
 /* global colors */
 :root {
