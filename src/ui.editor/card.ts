@@ -1,6 +1,6 @@
-import { css, CSSResultGroup, html, LitElement, nothing } from "lit";
+import { css, CSSResultGroup, html, LitElement, nothing, render } from "lit";
 import { LovelaceCardEditor } from "frontend/src/panels/lovelace/types"
-import { HanaUiCardConfig } from "../ui/card"
+import { HanaUiCard, HanaUiCardConfig } from "../ui/card"
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "frontend/src/types";
 import { fireEvent, HASSDomEvent } from "frontend/src/common/dom/fire_event";
@@ -27,9 +27,9 @@ const SCHEMA = [
 export abstract class HanaUiCardEditor extends LitElement implements LovelaceCardEditor {
 
     @property({ attribute: false }) public hass?: HomeAssistant
-    @property({ attribute: false }) public _config?: HanaUiCardConfig
     @property({ attribute: false }) public lovelace?: LovelaceConfig
-
+    
+    @state() public _config?: HanaUiCardConfig
     @state() protected GUImode = true
     @state() protected guiModeAvailable? = true
 
@@ -57,7 +57,7 @@ export abstract class HanaUiCardEditor extends LitElement implements LovelaceCar
         const wrapper = document.createElement('hana-ui-card')
         wrapper.title = "Select Card"
         wrapper.icon = "mdi:card-account-details-outline"
-        wrapper.card = this.cardSelector(this._config)
+        wrapper.card = this.cardSelector(wrapper)
 
         return html`<ha-form
             .hass=${this.hass}
@@ -70,26 +70,26 @@ export abstract class HanaUiCardEditor extends LitElement implements LovelaceCar
         </div>`
     }
 
-    // protected handleCardPicked(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>) {
-    //     ev.stopPropagation();
-    //     if (!this._config) {
-    //       return;
-    //     }
-    //     this._config.card = ev.detail.config.card;
-    //     fireEvent(this, "config-changed", { config: this._config });
-    //   }
+    protected handleCardPicked(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>, _this: HanaUiCardEditor) {
+        ev.stopPropagation();
+        if (!_this._config) {
+          return;
+        }
+        _this._config = ev.detail.config;
+        fireEvent(_this, "config-changed", { config: _this._config });
+    }
 
-    private cardSelector(config: HanaUiCardConfig) {
+    private cardSelector(wrapper: HanaUiCard<HanaUiCardConfig>) {
         return html`<div style="padding: 0 var(--hana-ui-card-padding)">
             ${
-                config.card !== undefined
+                this._config?.card !== undefined
                 ?
                 html`<hui-card-element-editor
                     .hass=${this.hass}
-                    .value=${config.card}
+                    .value=${this._config.card}
                     .lovelace=${this.lovelace}
                     @config-changed=${(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>) => {
-                        this.handleConfigChanged(ev, this)
+                        this.handleConfigChanged(ev, wrapper)
                     }}
                     @GUImode-changed=${this.handleGUIModeChanged}
                 ></hui-card-element-editor>
@@ -99,11 +99,11 @@ export abstract class HanaUiCardEditor extends LitElement implements LovelaceCar
                     .hass=${this.hass}
                     .lovelace=${this.lovelace}
                     @config-changed=${(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>) => {
-                        this.handleConfigChanged(ev, this)
+                        this.handleConfigChanged(ev, wrapper)
                     }}
                 ></hui-card-picker>`
             }
-        </div>`
+        </div>`;
     }
 
     private valueChanged(ev: CustomEvent): void {
@@ -115,14 +115,16 @@ export abstract class HanaUiCardEditor extends LitElement implements LovelaceCar
         fireEvent(this, "config-changed", { config: ev.detail.value });
     }
 
-    protected handleConfigChanged(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>, _this: HanaUiCardEditor) {
+    protected handleConfigChanged(ev: HASSDomEvent<ConfigChangedEvent<HanaUiCardConfig>>, wrapper: HanaUiCard<HanaUiCardConfig>) {
         ev.stopPropagation();
-        if (!_this._config) {
+        if (!this._config) {
           return;
         }
-        const newConfig = Object.assign({}, _this._config, { card: ev.detail.config })
-        _this._config = newConfig;
-        fireEvent(this, "config-changed", { config: _this._config });
+        const newConfig = Object.assign({}, this._config, { card: ev.detail.config })
+        this._config = newConfig;
+        wrapper.card = this.cardSelector(wrapper)
+        wrapper.requestUpdate()
+        fireEvent(this, "config-changed", { config: this._config });
     }
 
     protected handleGUIModeChanged(ev: HASSDomEvent<GUIModeChangedEvent>): void {
