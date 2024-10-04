@@ -27,6 +27,8 @@
 
     --primary-text-color: var(--hana-ui-text-color);
     --primary-background-color: var(--hana-ui-background-color);
+
+    --input-fill-color: hsl(var(--hana-ui-gray-base) 90%);
 }
 
 /* global font */
