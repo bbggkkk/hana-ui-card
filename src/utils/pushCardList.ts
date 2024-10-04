@@ -4,14 +4,14 @@ export type CardDescription = {
     type: keyof HTMLElementTagNameMap
     name: string
     preview: boolean
-    description: string|HTMLElement|TemplateResult<1>
+    description?: string|HTMLElement|TemplateResult<1>
     documentationURL: string // Adds a help link in the frontend card editor
 }
 export function pushCardList({
     type, 
     name = '', 
     preview = false, 
-    description = '', 
+    description, 
     documentationURL = ''
 }: CardDescription) {
     window.customCards = window.customCards || []
