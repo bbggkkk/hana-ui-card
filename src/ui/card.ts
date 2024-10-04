@@ -113,6 +113,11 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
         }
     }
 
+    constructor(){
+        super()
+        this.attachShadow({mode:'open'})
+    }
+
     setConfig(config: T) {
         this._config = config
         if (config.card) {
@@ -123,11 +128,12 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
     }
 
     getCardSize(){
-        const cardElement = document.querySelector('hui-card')
+        const shadowRoot = this.shadowRoot
+        const cardElement = shadowRoot?.querySelector('hui-card')
         if(this.card !== undefined && cardElement) {
             return cardElement.getCardSize()
         } else {
-            return 1
+            return 5
         }
     }
 
@@ -141,7 +147,7 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
             this.toggleAttribute("ispanel", this.layout === "panel")
         }
     }
-
+    
     private createChildCard() {
         if(this._config === undefined || this._config.card === undefined || this.hass === undefined) {
             return undefined
@@ -162,10 +168,10 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
         this._hass = hass
         this.card = this.createChildCard()
     }
-
     get hass() {
         return this._hass!
     }
+
 }
 
 export interface HanaUiCardConfig extends LovelaceCardConfig {
