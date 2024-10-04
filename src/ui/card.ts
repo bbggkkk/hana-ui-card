@@ -14,11 +14,12 @@ export abstract class HanaUiCard<T extends HanaUiCardConfig> extends LitElement 
     }
     public static getStubConfig(): Record<string, unknown> {
         return {
-            title: "Hana UI Card",
-            icon: "mdi:card-account-details-star-outline",
+            title: "날씨",
+            icon: "mdi:weather-sunny",
             card: {
-                type: "entity",
-                entity: "sun.sun"
+                type: "weather-forecast",
+                entity: "weather.forecast_jib",
+                forecast_type: "daily"
             }
         };
     }
